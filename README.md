@@ -184,6 +184,43 @@ doc_id IN (
 Because library ids grow with each new edition of the same registration number, "earlier
 edition" is just "smaller id". The accumulation is a property of the query, not a nightly job.
 
+And a comment is not attached to the act as a whole — it hangs on the individual **paragraph**
+it explains, so commentary appears inline beside the exact clause rather than in a pile at the
+bottom of a long statute.
+
+### 📌 Anchored to paragraphs, never to offsets
+
+That anchoring is the quiet decision the whole annotation system rests on. Character offsets
+are the obvious way to mark a place in a text and the wrong one: they break the moment the
+wording shifts or the markup is re-rendered.
+
+Instead the parser gives every element of a document a stable name taken from the source
+document's own structure, and renders each one carrying it:
+
+```php
+// Every parsed element keeps the identifier the source itself gave it.
+return sprintf('<%1$s name="%2$s" %4$s>%3$s</%1$s>', $tag, $element['id'], $text, $class);
+```
+
+A comment then belongs to one named element. A bookmark spans a *range* of them: the user
+selects across the page, and what is stored is the name of the first element and the name of
+the last — never a pixel, never a character count.
+
+```js
+// Selection captured as element names…
+coords.block_start = startElement.getAttribute('name')
+coords.block_end   = endElement.getAttribute('name')
+
+// …and restored later by the same names, whatever the page looks like now.
+const from = document.querySelector(`[name="${bookmark.block_start}"]`)
+const to   = document.querySelector(`[name="${bookmark.block_end}"]`)
+```
+
+Bookmarks carry more besides the range: a flag for "the whole document" rather than a span, a
+colour, the user's own note, and folders to organise them. They can also be anchored to a
+*comment* instead of the legislative text — you can bookmark another lawyer's analysis exactly
+as you bookmark the article it discusses.
+
 ### 🧩 One abstraction for everything attached to a document
 
 Comments were not the only thing that needed anchoring to a paragraph — bookmarks, editorial
